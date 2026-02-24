@@ -99,6 +99,32 @@ namespace DUELink {
         ExecuteCommandNoReturn(cmd);
     }
 
+    //% block="Stop all"   
+    //% weight=10
+    export function StopAll(): void {
+        if (!_doSync) {
+            Sync() // sync first Execute
+            _doSync = true
+        }
+
+        let buf22 = pins.createBuffer(1)
+        buf22[0] = 27
+        pins.i2cWriteBuffer(0x52, buf22)
+        pause(100)        
+    }
+
+    //% block="Run"  
+    //% weight=20
+    export function Run(): void {
+        if (!_doSync) {
+            Sync() // sync first Execute
+            _doSync = true
+        }
+
+        const cmd = `run`;
+        ExecuteCommandNoReturn(cmd);
+    }
+
     //% blockHidden=1
     function ReadResponse(): string {
         _value_response = -1
@@ -256,13 +282,13 @@ namespace DUELink {
         _timeout = 1000
 
         let buf22 = pins.createBuffer(1)
-        buf22[0] = 27
-        pins.i2cWriteBuffer(0x52, buf22)
-        pause(100)
+        //buf22[0] = 27
+        //pins.i2cWriteBuffer(0x52, buf22)
+        //pause(100)
 
         buf22[0] = 10
         pins.i2cWriteBuffer(0x52, buf22)
-        pause(10)
+        pause(300)
         
         ReadResponse()
     }
