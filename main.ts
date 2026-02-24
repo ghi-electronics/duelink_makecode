@@ -65,25 +65,35 @@ namespace DUELink {
     }
 
     //% block="command $command with params $params"
+    //% command.defl="Statled"
+    //% params.shadow="lists_create_with"
     //% weight=73
     //% group="Commands"
-    export function Command(command: string, params: string[]): string {
+    export function Command(command: string, params: number[]): string {
 
-        let textCommands = ["Text", "TextS", "TextT"]
-
-        let finalParams = params.map((p, index) => {
-
-            if (textCommands.indexOf(command) >= 0 && index === 0) {
-
-                let safe = p.split('"').join('\\"')
-                return `"${safe}"`
-            }
-
-            return p
-
-        }).join(",")
+        let finalParams = params.join(",")
 
         return `${command}(${finalParams})`
+    }
+
+    //% block="command $command with text param $text params $params"
+    //% command.defl="Text"
+    //% text.defl="DUELink"
+    //% params.shadow="lists_create_with"
+    //% weight=73
+    //% group="Commands"
+    export function TextCommand(command: string, text: string, params: number[]): string {
+
+        // escape quotes inside text (MakeCode-safe way)
+        let safe = text.split('"').join('\\"')
+
+        if (!params || params.length === 0) {
+            return `${command}("${safe}")`
+        }
+
+        let numericPart = params.join(",")
+
+        return `${command}("${safe}",${numericPart})`
     }
 
     
