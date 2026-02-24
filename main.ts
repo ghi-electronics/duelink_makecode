@@ -65,8 +65,7 @@ namespace DUELink {
     }
 
     //% block="command $command with params $params"
-    //% command.defl="Statled"
-    //% params.shadow="lists_create_with"
+    //% command.defl="dread"
     //% weight=73
     //% group="Commands"
     export function Command(command: string, params: number[]): string {
@@ -79,7 +78,6 @@ namespace DUELink {
     //% block="command $command with text param $text params $params"
     //% command.defl="Text"
     //% text.defl="DUELink"
-    //% params.shadow="lists_create_with"
     //% weight=73
     //% group="Commands"
     export function TextCommand(command: string, text: string, params: number[]): string {
@@ -96,10 +94,27 @@ namespace DUELink {
         return `${command}("${safe}",${numericPart})`
     }
 
+    //% block="Execute command %text"
+    //% text.defl="statled(100,100,10)"
+    //% weight=72
+    //% group="Commands"
+    export function ExecuteCommandNoReturn(text: string): void {
+        if (!_doSync) {
+            Sync() // sync first Execute
+            _doSync = true
+        }
+
+        pins.i2cWriteBuffer(0x52, Buffer.fromUTF8(text), false);
+        let buf2 = pins.createBuffer(1)
+        buf2[0] = 10
+        pins.i2cWriteBuffer(0x52, buf2)
+        ReadResponse()
+    }
+
     
     //% block="Execute command %text return number"
     //% text.defl="dread(1,2)"
-    //% weight=72
+    //% weight=71
     //% group="Commands"
     export function ExecuteCommand(text: string ): number {
         if (!_doSync) {
@@ -134,7 +149,7 @@ namespace DUELink {
 
     //% block="Execute command %text return string"
     //% text.defl="version()"
-    //% weight=71
+    //% weight=70
     //% group="Commands"
     export function ExecuteCommandRaw(text: string): string {
         if (!_doSync) {
@@ -147,24 +162,7 @@ namespace DUELink {
         buf2[0] = 10
         pins.i2cWriteBuffer(0x52, buf2)
         return ReadResponse()
-    }
-
-    //% block="Execute command %text"
-    //% text.defl="statled(100,100,10)"
-    //% weight=70
-    //% group="Commands"
-    export function ExecuteCommandNoReturn(text: string): void {
-        if (!_doSync) {
-            Sync() // sync first Execute
-            _doSync = true
-        }
-
-        pins.i2cWriteBuffer(0x52, Buffer.fromUTF8(text), false);
-        let buf2 = pins.createBuffer(1)
-        buf2[0] = 10
-        pins.i2cWriteBuffer(0x52, buf2)
-        ReadResponse()
-    }
+    }    
 
     //% block="Set response timeout to %timeout milliseconds"
     //% timeout.defl=1000
@@ -172,10 +170,23 @@ namespace DUELink {
     //% group="Advanced"
     export function SetTimeout(timeout: number) {
         _timeout = timeout
+    }    
+
+    //% block="Run"  
+    //% weight=11
+    //% group="Advanced"
+    export function Run(): void {
+        if (!_doSync) {
+            Sync() // sync first Execute
+            _doSync = true
+        }
+
+        const cmd = `run`;
+        ExecuteCommandNoReturn(cmd);
     }
 
     //% block="Stop all"   
-    //% weight=11
+    //% weight=10
     //% group="Advanced"
     export function StopAll(): void {
         if (!_doSync) {
@@ -186,20 +197,7 @@ namespace DUELink {
         let buf22 = pins.createBuffer(1)
         buf22[0] = 27
         pins.i2cWriteBuffer(0x52, buf22)
-        pause(100)        
-    }
-
-    //% block="Run"  
-    //% weight=10
-    //% group="Advanced"
-    export function Run(): void {
-        if (!_doSync) {
-            Sync() // sync first Execute
-            _doSync = true
-        }
-
-        const cmd = `run`;
-        ExecuteCommandNoReturn(cmd);
+        pause(100)
     }
 
     //% blockHidden=1
