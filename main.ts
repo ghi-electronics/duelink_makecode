@@ -1,17 +1,96 @@
 //% color="#046307" weight=10 icon="\uf2db"
+//% groups=['Basic','Commands','Advanced']
 namespace DUELink {
     let _str_response: string
     let _value_response: number
     let _timeout: number
     let _doSync: boolean
 
-    //% block="Set response timeout to %timeout milliseconds"
-    //% timeout.defl=1000
-    export function SetTimeout(timeout: number) {
-        _timeout = timeout
+    //% block="Select device %index "
+    //% index.defl="1"
+    //% weight=93
+    //% group="Basic"
+    export function Select(index: number): void {
+        if (!_doSync) {
+            Sync() // sync first Execute
+            _doSync = true
+        }
+
+        const cmd = `sel(${index})`;
+        ExecuteCommandNoReturn(cmd);
     }
+
+    //% block="Set Stat LED to high %high (ms), low %low (ms), count %count "
+    //% high.defl="100"
+    //% low.defl="100"
+    //% count.defl="10"
+    //% weight=92
+    //% group="Basic"
+    export function SetStatLed(high: number, low: number, count: number): void {
+        if (!_doSync) {
+            Sync() // sync first Execute
+            _doSync = true
+        }
+
+        const cmd = `statled(${high},${low},${count})`;
+        ExecuteCommandNoReturn(cmd);
+    }
+
+    //% block="device PID"
+    //% index.defl="1"
+    //% weight=91
+    //% group="Basic"
+    export function GetPID(): number {
+        if (!_doSync) {
+            Sync() // sync first Execute
+            _doSync = true
+        }
+
+        const cmd = `info(0)`;
+        return ExecuteCommand(cmd);
+    }
+
+    //% block="device firmware version"
+    //% index.defl="1"
+    //% weight=90
+    //% group="Basic"
+    export function GetVersion(): number {
+        if (!_doSync) {
+            Sync() // sync first Execute
+            _doSync = true
+        }
+
+        const cmd = `info(1)`;
+        return ExecuteCommand(cmd);
+    }
+
+    //% block="command $command with params $params"
+    //% weight=73
+    //% group="Commands"
+    export function Command(command: string, params: string[]): string {
+
+        let textCommands = ["Text", "TextS", "TextT"]
+
+        let finalParams = params.map((p, index) => {
+
+            if (textCommands.indexOf(command) >= 0 && index === 0) {
+
+                let safe = p.split('"').join('\\"')
+                return `"${safe}"`
+            }
+
+            return p
+
+        }).join(",")
+
+        return `${command}(${finalParams})`
+    }
+
+    
     //% block="Execute command %text return number"
     //% text.defl="dread(1,2)"
+    //% weight=72
+    //% group="Commands"
     export function ExecuteCommand(text: string ): number {
         if (!_doSync) {
             Sync() // sync first Execute
@@ -45,6 +124,8 @@ namespace DUELink {
 
     //% block="Execute command %text return string"
     //% text.defl="version()"
+    //% weight=71
+    //% group="Commands"
     export function ExecuteCommandRaw(text: string): string {
         if (!_doSync) {
             Sync() // sync first Execute
@@ -60,6 +141,8 @@ namespace DUELink {
 
     //% block="Execute command %text"
     //% text.defl="statled(100,100,10)"
+    //% weight=70
+    //% group="Commands"
     export function ExecuteCommandNoReturn(text: string): void {
         if (!_doSync) {
             Sync() // sync first Execute
@@ -73,34 +156,17 @@ namespace DUELink {
         ReadResponse()
     }
 
-    //% block="Set Stat LED to high %high (ms), low %low (ms), count %count "
-    //% high.defl="100"
-    //% low.defl="100"
-    //% count.defl="10"
-    export function SetStatLed(high: number, low: number, count:number): void {
-        if (!_doSync) {
-            Sync() // sync first Execute
-            _doSync = true
-        }
-
-        const cmd = `statled(${high},${low},${count})`;
-        ExecuteCommandNoReturn(cmd);
-    }
-
-    //% block="Select device %index "
-    //% index.defl="1"
-    export function Select(index: number): void {
-        if (!_doSync) {
-            Sync() // sync first Execute
-            _doSync = true
-        }        
-
-        const cmd = `sel(${index})`;
-        ExecuteCommandNoReturn(cmd);
+    //% block="Set response timeout to %timeout milliseconds"
+    //% timeout.defl=1000
+    //% weight=12
+    //% group="Advanced"
+    export function SetTimeout(timeout: number) {
+        _timeout = timeout
     }
 
     //% block="Stop all"   
-    //% weight=10
+    //% weight=11
+    //% group="Advanced"
     export function StopAll(): void {
         if (!_doSync) {
             Sync() // sync first Execute
@@ -114,7 +180,8 @@ namespace DUELink {
     }
 
     //% block="Run"  
-    //% weight=20
+    //% weight=10
+    //% group="Advanced"
     export function Run(): void {
         if (!_doSync) {
             Sync() // sync first Execute
